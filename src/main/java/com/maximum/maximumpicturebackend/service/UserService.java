@@ -1,10 +1,14 @@
 package com.maximum.maximumpicturebackend.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.maximum.maximumpicturebackend.model.dto.user.UserQueryRequest;
 import com.maximum.maximumpicturebackend.model.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.maximum.maximumpicturebackend.model.vo.user.LoginUserVO;
+import com.maximum.maximumpicturebackend.model.vo.user.UserVO;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
 * @author maximum
@@ -56,4 +60,21 @@ public interface UserService extends IService<User> {
      */
     boolean userLogout(HttpServletRequest request);
 
+    /**
+     * 获得脱敏后的用户信息
+     * @param user
+     * @return
+     */
+    UserVO getUserVO(User user);
+
+    String getEncryptPassword(String userPassword);
+
+    /**
+     * 获得脱敏后的用户信息列表
+     * @param userList
+     * @return
+     */
+    List<UserVO> getUserVOList(List<User> userList);
+
+    QueryWrapper<User> getQueryWrapper(UserQueryRequest userQueryRequest);
 }
