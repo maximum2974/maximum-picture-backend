@@ -70,6 +70,12 @@
             <artifactId>knife4j-openapi2-spring-boot-starter</artifactId>
             <version>4.4.0</version>
         </dependency>
+        <!--腾讯云对象存储-->
+        <dependency>
+            <groupId>com.qcloud</groupId>
+            <artifactId>cos_api</artifactId>
+            <version>5.6.227</version>
+        </dependency>
         <!-- Spring Boot Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
