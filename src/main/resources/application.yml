@@ -10,6 +10,9 @@ spring:
     url: jdbc:mysql://localhost:3306/maximum_picture
     username: root
     password: LYH20031123
+  servlet:
+    multipart:
+      max-file-size: 10MB
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false

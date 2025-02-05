@@ -1,4 +1,4 @@
-package com.maximum.maximumpicturebackend.manager;
+package com.maximum.maximumpicturebackend.mapper;
 
 import com.maximum.maximumpicturebackend.model.entity.Picture;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
