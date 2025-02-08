@@ -2,6 +2,9 @@ server:
   port: 8123
   servlet:
     context-path: /api
+    session:
+      cookie:
+        max-age: 2592000
 spring:
   application:
     name: maximum-picture-backend
@@ -16,6 +19,9 @@ spring:
     port: 6379
     timeout: 5000
     password: LYH20031123
+  session:
+    store-type: redis
+    timeout: 2592000
   servlet:
     multipart:
       max-file-size: 10MB

@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.maximum.maximumpicturebackend.exception.BusinessException;
 import com.maximum.maximumpicturebackend.exception.ErrorCode;
 import com.maximum.maximumpicturebackend.exception.ThrowUtils;
+import com.maximum.maximumpicturebackend.manager.CosManager;
 import com.maximum.maximumpicturebackend.manager.FileManager;
 import com.maximum.maximumpicturebackend.manager.upload.FilePictureUpload;
 import com.maximum.maximumpicturebackend.manager.upload.PictureUploadTemplate;
@@ -33,6 +34,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -58,6 +60,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
     private FileManager fileManager;
     @Autowired
     private UserService userService;
+    @Resource
+    private CosManager cosManager;
 
     @Resource
     private FilePictureUpload filePictureUpload;
@@ -94,6 +98,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         //构造要入库的图片信息
         Picture picture = new Picture();
         picture.setUrl(uploadPictureResult.getUrl());
+        picture.setThumbnailUrl(uploadPictureResult.getThumbnailUrl());
         String picName = uploadPictureResult.getPicName();
         if(pictureUploadRequest != null && StrUtil.isNotBlank(pictureUploadRequest.getPicName())){
             picName = pictureUploadRequest.getPicName();
@@ -320,6 +325,26 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
         return uploadCount;
     }
 
+    @Async
+    @Override
+    public void clearPictureFile(Picture oldPicture) {
+        // 判断该图片是否被多条记录使用
+        String pictureUrl = oldPicture.getUrl();
+        long count = this.lambdaQuery()
+                .eq(Picture::getUrl, pictureUrl)
+                .count();
+        // 有不止一条记录用到了该图片，不清理
+        if (count > 1) {
+            return;
+        }
+        // FIXME 注意，这里的 url 包含了域名，实际上只要传 key 值（存储路径）就够了
+        cosManager.deleteObject(oldPicture.getUrl());
+        // 清理缩略图
+        String thumbnailUrl = oldPicture.getThumbnailUrl();
+        if (StrUtil.isNotBlank(thumbnailUrl)) {
+            cosManager.deleteObject(thumbnailUrl);
+        }
+    }
 }
 
 
