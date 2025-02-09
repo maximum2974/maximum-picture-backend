@@ -2,10 +2,7 @@ package com.maximum.maximumpicturebackend.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.maximum.maximumpicturebackend.model.dto.picture.PictureQueryRequest;
-import com.maximum.maximumpicturebackend.model.dto.picture.PictureReviewRequest;
-import com.maximum.maximumpicturebackend.model.dto.picture.PictureUploadByBatchRequest;
-import com.maximum.maximumpicturebackend.model.dto.picture.PictureUploadRequest;
+import com.maximum.maximumpicturebackend.model.dto.picture.*;
 import com.maximum.maximumpicturebackend.model.entity.Picture;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.maximum.maximumpicturebackend.model.entity.User;
@@ -66,4 +63,15 @@ public interface PictureService extends IService<Picture> {
      * @param oldPicture
      */
     void clearPictureFile(Picture oldPicture);
+
+    void editPicture(PictureEditRequest pictureEditRequest, User loginUser);
+
+    /**
+     * 校验空间图片的权限
+     * @param loginUser
+     * @param picture
+     */
+    void checkPictureAuth(User loginUser, Picture picture);
+
+    void deletePicture(long pictureId, User loginUser);
 }
