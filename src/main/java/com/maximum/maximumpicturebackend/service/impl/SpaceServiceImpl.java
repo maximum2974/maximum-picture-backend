@@ -11,11 +11,9 @@ import com.maximum.maximumpicturebackend.exception.ErrorCode;
 import com.maximum.maximumpicturebackend.exception.ThrowUtils;
 import com.maximum.maximumpicturebackend.model.dto.space.SpaceAddRequest;
 import com.maximum.maximumpicturebackend.model.dto.space.SpaceQueryRequest;
-import com.maximum.maximumpicturebackend.model.entity.Picture;
 import com.maximum.maximumpicturebackend.model.entity.Space;
 import com.maximum.maximumpicturebackend.model.entity.User;
 import com.maximum.maximumpicturebackend.model.enums.SpaceLevelEnum;
-import com.maximum.maximumpicturebackend.model.vo.picture.PictureVO;
 import com.maximum.maximumpicturebackend.model.vo.space.SpaceVO;
 import com.maximum.maximumpicturebackend.model.vo.user.UserVO;
 import com.maximum.maximumpicturebackend.service.SpaceService;
@@ -152,41 +150,45 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
         spaceVOPage.setRecords(spaceVOList);
         return spaceVOPage;
     }
-
     @Override
     public long addSpace(SpaceAddRequest spaceAddRequest, User loginUser) {
+        // 在此处将实体类和 DTO 进行转换
         Space space = new Space();
         BeanUtils.copyProperties(spaceAddRequest, space);
-        //默认值
-        if(StrUtil.isBlank(spaceAddRequest.getSpaceName())){
+        // 默认值
+        if (StrUtil.isBlank(spaceAddRequest.getSpaceName())) {
             space.setSpaceName("默认空间");
         }
-        if(spaceAddRequest.getSpaceLevel() == null){
+        if (spaceAddRequest.getSpaceLevel() == null) {
             spaceAddRequest.setSpaceLevel(SpaceLevelEnum.COMMON.getValue());
         }
-        //填充数据
+        // 填充数据
+        this.fillSpaceBySpaceLevel(space);
+        // 数据校验
         this.validSpace(space, true);
         Long userId = loginUser.getId();
         space.setUserId(userId);
-        //权限校验
-        if(SpaceLevelEnum.COMMON.getValue() != spaceAddRequest.getSpaceLevel() && !userService.isAdmin(loginUser)){
+        // 权限校验
+        if (SpaceLevelEnum.COMMON.getValue() != spaceAddRequest.getSpaceLevel() && !userService.isAdmin(loginUser)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权限创建指定级别的空间");
         }
-        //针对用户加锁
+        // 针对用户进行加锁
         String lock = String.valueOf(userId).intern();
-        synchronized (lock){
+        synchronized (lock) {
             Long newSpaceId = transactionTemplate.execute(status -> {
-                boolean exists = this.lambdaQuery()
-                        .eq(Space::getUserId, userId)
-                        .exists();
+                boolean exists = this.lambdaQuery().eq(Space::getUserId, userId).exists();
                 ThrowUtils.throwIf(exists, ErrorCode.OPERATION_ERROR, "每个用户仅能有一个私有空间");
+                // 写入数据库
                 boolean result = this.save(space);
                 ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+                // 返回新写入的数据 id
                 return space.getId();
             });
+            // 返回结果是包装类，可以做一些处理
             return Optional.ofNullable(newSpaceId).orElse(-1L);
         }
     }
+
 }
 
 
