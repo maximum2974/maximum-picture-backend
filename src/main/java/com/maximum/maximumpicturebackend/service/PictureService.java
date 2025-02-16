@@ -10,6 +10,7 @@ import com.maximum.maximumpicturebackend.model.vo.picture.PictureVO;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
 * @author maximum
@@ -74,4 +75,15 @@ public interface PictureService extends IService<Picture> {
     void checkPictureAuth(User loginUser, Picture picture);
 
     void deletePicture(long pictureId, User loginUser);
+
+    /**
+     * 根据颜色搜索图片
+     * @param spaceId
+     * @param picColor
+     * @param loginUser
+     * @return
+     */
+    List<PictureVO> searchPictureByColor(Long spaceId, String picColor, User loginUser);
+
+    void editPictureByBatch(PictureEditByBatchRequest pictureEditByBatchRequest, User loginUser);
 }
