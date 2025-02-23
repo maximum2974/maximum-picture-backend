@@ -10,6 +10,7 @@ import com.maximum.maximumpicturebackend.constant.UserConstant;
 import com.maximum.maximumpicturebackend.exception.BusinessException;
 import com.maximum.maximumpicturebackend.exception.ErrorCode;
 import com.maximum.maximumpicturebackend.exception.ThrowUtils;
+import com.maximum.maximumpicturebackend.manager.auth.SpaceUserAuthManager;
 import com.maximum.maximumpicturebackend.model.dto.space.*;
 import com.maximum.maximumpicturebackend.model.entity.Space;
 import com.maximum.maximumpicturebackend.model.entity.User;
@@ -35,6 +36,9 @@ public class SpaceController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private SpaceUserAuthManager spaceUserAuthManager;
 
     @PostMapping("/add")
     public BaseResponse<Long> addSpace(@RequestBody SpaceAddRequest spaceAddRequest, HttpServletRequest request) {
@@ -111,9 +115,14 @@ public class SpaceController {
         // 查询数据库
         Space space = spaceService.getById(id);
         ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR);
+        SpaceVO spaceVO = spaceService.getSpaceVO(space, request);
+        User loginUser = userService.getLoginUser(request);
+        List<String> permissionList = spaceUserAuthManager.getPermissionList(space, loginUser);
+        spaceVO.setPermissionList(permissionList);
         // 获取封装类
-        return ResultUtils.success(spaceService.getSpaceVO(space, request));
+        return ResultUtils.success(spaceVO);
     }
+
 
     /**
      * 分页获取空间列表（仅管理员可用）

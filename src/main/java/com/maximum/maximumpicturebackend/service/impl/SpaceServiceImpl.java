@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.maximum.maximumpicturebackend.exception.BusinessException;
 import com.maximum.maximumpicturebackend.exception.ErrorCode;
 import com.maximum.maximumpicturebackend.exception.ThrowUtils;
+import com.maximum.maximumpicturebackend.manager.sharding.DynamicShardingManager;
 import com.maximum.maximumpicturebackend.model.dto.space.SpaceAddRequest;
 import com.maximum.maximumpicturebackend.model.dto.space.SpaceQueryRequest;
 import com.maximum.maximumpicturebackend.model.entity.Space;
@@ -25,6 +26,7 @@ import com.maximum.maximumpicturebackend.service.SpaceUserService;
 import com.maximum.maximumpicturebackend.service.UserService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.servlet.FrameworkServlet;
@@ -53,6 +55,9 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
     private FrameworkServlet frameworkServlet;
     @Autowired
     private SpaceUserService spaceUserService;
+    @Autowired
+    @Lazy
+    private DynamicShardingManager dynamicShardingManager;
 
 
     @Override
@@ -213,6 +218,8 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space>
                     result = spaceUserService.save(spaceUser);
                     ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR, "创建团队成员记录失败");
                 }
+                //创建分表
+                dynamicShardingManager.createSpacePictureTable(space);
                 // 返回新写入的数据 id
                 return space.getId();
             });
